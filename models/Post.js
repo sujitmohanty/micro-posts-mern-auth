@@ -17,9 +17,6 @@ const postSchema = new mongoose.Schema({
   creator: {
     type: String,
   },
-  selectedFile: {
-    type: String,
-  },
   createdAt: {
     type: Date,
     default: new Date(),
