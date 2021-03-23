@@ -4,7 +4,6 @@ const morgan = require('morgan');
 const cors = require('cors');
 
 const connectDB = require('./config/db');
-const errorMiddleware = require('./middlewares/errors');
 
 //Import routes
 const posts = require('./routes/post');
@@ -31,9 +30,6 @@ app.use(cors());
 
 app.use('/api', posts);
 app.use('/api', users);
-
-//Middleware to handle errors
-app.use(errorMiddleware);
 
 const PORT = process.env.PORT || 5000;
 

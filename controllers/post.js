@@ -1,67 +1,83 @@
-const ErrorHandler = require('../utils/errorHandler');
-const asyncHandler = require('express-async-handler');
 const Post = require('../models/Post.js');
 
 // @desc    Fetch all posts
-exports.getPosts = asyncHandler(async (req, res) => {
-  const posts = await Post.find({});
-
-  res.status(200).json(posts);
-});
+exports.getPosts = async (req, res) => {
+  try {
+    const posts = await Post.find({});
+    res.status(200).json(posts);
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
 
 /*
-
 // @desc    Fetch single post
-exports.getSinglePost = asyncHandler(async (req, res) => {
-  const post = await Post.findById(req.params.id);
+exports.getSinglePost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
 
-  if (!post) {
-    return next(new ErrorHandler('Post not found', 404));
+    if (!post) {
+      return next(new ErrorHandler('Post not found', 404));
+    }
+
+    res.status(200).json(post);
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong' });
   }
-
-  res.status(200).json(post);
-});
+};
 
 */
 
 // @desc    Delete a post
-exports.deletePost = asyncHandler(async (req, res, next) => {
-  const post = await Post.findById(req.params.id);
+exports.deletePost = async (req, res, next) => {
+  try {
+    const post = await Post.findById(req.params.id);
 
-  if (!post) {
-    return next(new ErrorHandler('Post not found', 404));
+    if (!post) {
+      return next(new ErrorHandler('Post not found', 404));
+    }
+
+    await post.remove();
+
+    res.status(200).json({
+      message: 'Post was deleted.',
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong' });
   }
-
-  await post.remove();
-
-  res.status(200).json({
-    message: 'Post was deleted.',
-  });
-});
+};
 
 // @desc    Create a post
-exports.createPost = asyncHandler(async (req, res) => {
-  const createdPost = await Post.create({
-    ...req.body,
-    creator: req.userId,
-    createdAt: new Date().toISOString(),
-  });
-  res.status(201).json(createdPost);
-});
+exports.createPost = async (req, res) => {
+  try {
+    const createdPost = await Post.create({
+      ...req.body,
+      creator: req.userId,
+      createdAt: new Date().toISOString(),
+    });
+    res.status(201).json(createdPost);
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
 
 // @desc    Update a post
-exports.updatePost = asyncHandler(async (req, res) => {
-  let post = await Post.findById(req.params.id);
+exports.updatePost = async (req, res) => {
+  try {
+    let post = await Post.findById(req.params.id);
 
-  if (!post) {
-    return next(new ErrorHandler('Post not found', 404));
+    if (!post) {
+      return next(new ErrorHandler('Post not found', 404));
+    }
+
+    post = await Post.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+      useFindAndModify: false,
+    });
+
+    res.status(200).json(post);
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong' });
   }
-
-  post = await Post.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-    useFindAndModify: false,
-  });
-
-  res.status(200).json(post);
-});
+};
