@@ -1,4 +1,5 @@
 const Post = require('../models/Post.js');
+const mongoose = require('mongoose');
 
 // @desc    Fetch all posts
 exports.getPosts = async (req, res) => {
@@ -6,7 +7,7 @@ exports.getPosts = async (req, res) => {
     const posts = await Post.find({});
     res.status(200).json(posts);
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong' });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -16,34 +17,27 @@ exports.getSinglePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
 
-    if (!post) {
-      return next(new ErrorHandler('Post not found', 404));
-    }
-
     res.status(200).json(post);
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong' });
+    res.status(500).json({ message: error.message });
   }
 };
 
 */
 
 // @desc    Delete a post
-exports.deletePost = async (req, res, next) => {
+exports.deletePost = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
+    const { id } = req.params;
 
-    if (!post) {
-      return next(new ErrorHandler('Post not found', 404));
-    }
+    if (!mongoose.Types.ObjectId.isValid(id))
+      return res.status(404).send(`No such post`);
 
-    await post.remove();
+    await Post.findByIdAndRemove(id);
 
-    res.status(200).json({
-      message: 'Post was deleted.',
-    });
+    res.json({ message: 'Post deleted successfully.' });
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong' });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -57,7 +51,7 @@ exports.createPost = async (req, res) => {
     });
     res.status(201).json(createdPost);
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong' });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -67,7 +61,7 @@ exports.updatePost = async (req, res) => {
     let post = await Post.findById(req.params.id);
 
     if (!post) {
-      return next(new ErrorHandler('Post not found', 404));
+      return res.status(404).send(`No post found!`);
     }
 
     post = await Post.findByIdAndUpdate(req.params.id, req.body, {
@@ -78,6 +72,6 @@ exports.updatePost = async (req, res) => {
 
     res.status(200).json(post);
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong' });
+    res.status(500).json({ message: error.message });
   }
 };
